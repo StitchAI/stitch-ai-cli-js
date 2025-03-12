@@ -1,6 +1,6 @@
 {
   "name": "@stitch-ai/cli",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Stitch AI CLI",
   "scripts": {
     "build": "tsc"
