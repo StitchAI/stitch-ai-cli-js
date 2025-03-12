@@ -8,6 +8,9 @@
   "bin": {
     "stitch": "lib/index.js"
   },
+  "files": [
+    "lib"
+  ],
   "author": "Stitch AI",
   "license": "MIT",
   "dependencies": {
