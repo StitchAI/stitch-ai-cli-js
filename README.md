@@ -25,6 +25,14 @@ The Stitch SDK provides a set of commands to manage memory spaces and the memori
 them. Below is an in-depth explanation of each command along with its functionality and usage
 examples.
 
+### 0. Generate Api Key
+
+Generate new api key for the given wallet address
+
+```bash
+stitch key [walletAddress]
+```
+
 ### 1. Create Memory Space
 
 Creates a new memory space using the specified name.
