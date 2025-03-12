@@ -1,16 +1,15 @@
 {
-  "name": "stitch-ai-sdk-js",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@stitch-ai/cli",
+  "version": "0.0.1",
+  "description": "Stitch AI CLI",
   "scripts": {
-    "build": "tsc",
-    "build-link": "tsc && npm link"
+    "build": "tsc"
   },
   "bin": {
     "stitch": "./lib/index.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Stitch AI",
+  "license": "MIT",
   "dependencies": {
     "commander": "^13.1.0"
   },
