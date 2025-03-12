@@ -1,11 +1,21 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 
+import { createApiKey } from './modules/api-key';
 import { listMemories, pullMemory, pushMemory } from './modules/memory';
 import { createMemorySpace, listSpaces } from './modules/memory-space';
 const program = new Command();
 
 program.version('1.0.0').description('Stitch CLI');
+
+// create-space
+program
+  .command('key <walletAddress>')
+  .description('Create api key for the given wallet address')
+  .action(async (walletAddress: string) => {
+    const result = await createApiKey({ walletAddress });
+    console.log(result);
+  });
 
 // create-space
 program
