@@ -6,7 +6,7 @@
     "build": "tsc"
   },
   "bin": {
-    "stitch": "./lib/index.js"
+    "stitch": "lib/index.js"
   },
   "author": "Stitch AI",
   "license": "MIT",
