@@ -31,7 +31,7 @@ export async function pushMemory(args: PushMemory) {
   }
 
   if (args.characterPath) {
-    if (args.characterPath.endsWith('.sqlite')) {
+    if (args.characterPath.endsWith('.json')) {
       characterData = await processCharacterFile(args.characterPath);
     } else {
       characterData = '';
