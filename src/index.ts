@@ -29,11 +29,20 @@ program
 // push
 program
   .command('push <space> <message>')
+  .option('-e, --episodic <episodic>', 'Episodic memory file path')
+  .option('-c, --character <character>', 'Character memory file path')
   .description('Push to a specific memory with a message')
-  .action(async (space: string, message: string) => {
-    const result = await pushMemory({ space, message });
-    console.log(result);
-  });
+  .action(
+    async (space: string, message: string, options: { episodic?: string; character?: string }) => {
+      const result = await pushMemory({
+        space,
+        message,
+        episodicPath: options.episodic,
+        characterPath: options.character,
+      });
+      console.log(result);
+    }
+  );
 
 // pull
 program

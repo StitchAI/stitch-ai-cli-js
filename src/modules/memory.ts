@@ -1,8 +1,11 @@
 import { BASE_URL } from '../utils/api';
+import { processCharacterFile, processMemoryFile, processSqliteFile } from '../utils/sqlite';
 
 type PushMemory = {
   space: string;
   message: string;
+  episodicPath?: string;
+  characterPath?: string;
 };
 
 export async function pushMemory(args: PushMemory) {
@@ -10,6 +13,29 @@ export async function pushMemory(args: PushMemory) {
 
   if (!apiKey) {
     throw new Error('STITCH_API_KEY is not set');
+  }
+
+  if (!args.episodicPath && !args.characterPath) {
+    throw new Error('episodic and character memory file path must be provided');
+  }
+
+  let episodicData: string = '';
+  let characterData: string = '';
+
+  if (args.episodicPath) {
+    if (args.episodicPath.endsWith('.sqlite')) {
+      episodicData = await processSqliteFile(args.episodicPath);
+    } else {
+      episodicData = await processMemoryFile(args.episodicPath);
+    }
+  }
+
+  if (args.characterPath) {
+    if (args.characterPath.endsWith('.sqlite')) {
+      characterData = await processCharacterFile(args.characterPath);
+    } else {
+      characterData = '';
+    }
   }
 
   const fetched = await fetch(`${BASE_URL}/memory/${args.space}`, {
@@ -20,8 +46,8 @@ export async function pushMemory(args: PushMemory) {
     },
     body: JSON.stringify({
       message: args.message,
-      episodicMemory: 'episodic',
-      characterMemory: 'character',
+      episodicMemory: episodicData,
+      characterMemory: characterData,
     }),
   });
   if (!fetched.ok) {
