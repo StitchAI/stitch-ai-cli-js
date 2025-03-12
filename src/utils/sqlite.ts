@@ -8,12 +8,24 @@ interface MemoryData {
 
 interface CharacterData {
   name?: string;
+  username?: string;
+  plugins?: any[];
+  modelProvider?: string;
+  settings?: any;
   system?: string;
-  bio?: string;
-  lore?: string;
-  style?: string;
-  adjectives?: string;
+  bio?: string[] | string;
+  lore?: string[] | string;
+  style?:
+    | {
+        all?: string[];
+        chat?: string[];
+        post?: string[];
+      }
+    | string;
+  adjectives?: string[] | string;
+  [key: string]: any; // 기타 모든 필드를 허용
 }
+
 export const processSqliteFile = async (filePath: string): Promise<string> => {
   try {
     const db = new Database(filePath, { readonly: true });
@@ -118,17 +130,15 @@ export const processCharacterFile = async (filePath: string): Promise<string> =>
   try {
     const data = fs.readFileSync(filePath, 'utf-8');
     const charData: CharacterData = JSON.parse(data);
-
     const keysToExtract = ['name', 'system', 'bio', 'lore', 'style', 'adjectives'];
-
     const filteredData = Object.fromEntries(
       keysToExtract
         .filter(key => key in charData)
         .map(key => [key, charData[key as keyof CharacterData]])
     );
-
     return JSON.stringify(filteredData, null, 2);
-  } catch {
+  } catch (error: any) {
+    console.error(`Error processing character file: ${error.message}`);
     throw new Error(`Character memory file not found - ${filePath}`);
   }
 };
