@@ -46,9 +46,8 @@ export const processSqliteFile = async (filePath: string): Promise<string> => {
 
           // Handle JSON strings - try to parse, clean, and re-stringify
           if (
-            (value.startsWith('{') && value.endsWith('}'))(
-              value.startsWith('[') && value.endsWith(']')
-            )
+            (value.startsWith('{') && value.endsWith('}')) ||
+            (value.startsWith('[') && value.endsWith(']'))
           ) {
             try {
               const parsedJson = JSON.parse(value);
