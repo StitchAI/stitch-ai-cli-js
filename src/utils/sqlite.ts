@@ -1,7 +1,5 @@
+import Database from 'better-sqlite3';
 import fs from 'fs';
-import sqlite3 from 'sqlite3';
-
-sqlite3.verbose();
 
 interface MemoryData {
   columns: string[];
@@ -18,43 +16,36 @@ interface CharacterData {
 }
 
 export const processSqliteFile = async (filePath: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const db = new sqlite3.Database(filePath, sqlite3.OPEN_READONLY, err => {
-      if (err) return reject(new Error(`Error reading SQLite database: ${err.message}`));
-    });
+  try {
+    const db = new Database(filePath, { readonly: true });
 
-    db.serialize(() => {
-      db.all('SELECT * FROM memories', (err, rows: any[]) => {
-        if (err) return reject(new Error(`Error executing SQL query: ${err.message}`));
+    const columnsQuery = db.prepare('PRAGMA table_info(memories)').all();
+    const columnNames = columnsQuery.map((col: any) => col.name);
 
-        db.all('PRAGMA table_info(memories)', (err, columns: { name: string }[]) => {
-          if (err) return reject(new Error(`Error fetching column names: ${err.message}`));
-
-          const columnNames = columns.map(col => col.name);
-          const processedRows = rows.map(row =>
-            columnNames.map(col => {
-              if (row[col] instanceof Buffer) {
-                try {
-                  return row[col].toString('utf-8');
-                } catch {
-                  return row[col].toString('base64');
-                }
-              }
-              return row[col];
-            })
-          );
-
-          const dbContent: { memories: MemoryData } = {
-            memories: { columns: columnNames, rows: processedRows },
-          };
-
-          resolve(JSON.stringify(dbContent, null, 2));
-        });
-      });
-    });
+    const rowsQuery = db.prepare('SELECT * FROM memories').all();
+    const processedRows = rowsQuery.map((row: any) =>
+      columnNames.map(col => {
+        if (row[col] instanceof Buffer) {
+          try {
+            return row[col].toString('utf-8');
+          } catch {
+            return row[col].toString('base64');
+          }
+        }
+        return row[col];
+      })
+    );
 
     db.close();
-  });
+
+    const dbContent: { memories: MemoryData } = {
+      memories: { columns: columnNames, rows: processedRows },
+    };
+
+    return JSON.stringify(dbContent, null, 2);
+  } catch (err) {
+    throw new Error(`Error processing SQLite database: ${(err as Error).message}`);
+  }
 };
 
 /**
