@@ -1,76 +1,75 @@
-import { BASE_URL } from '../utils/api';
+import { BASE_URL } from '~/libs/api';
 
-type CreateMemorySpace = {
-  name: string;
-};
-
-export async function createMemorySpace(args: CreateMemorySpace) {
-  const apiKey = process.env.STITCH_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('STITCH_API_KEY is not set');
-  }
-
-  const fetched = await fetch(`${BASE_URL}/memory/space`, {
+// 메모리 공간 생성
+export async function createMemorySpace(args: {
+  userId: string;
+  apiKey: string;
+  repository: string;
+}) {
+  const { userId, apiKey, repository } = args;
+  const fetched = await fetch(`${BASE_URL}/memory-space/create?userId=${userId}&apiKey=${apiKey}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apiKey: apiKey,
-    },
-    body: JSON.stringify(args),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ repository }),
   });
-  if (!fetched.ok) {
-    return `[STITCH AI] Memory Space Creation Failed`;
-  }
+  if (!fetched.ok) throw new Error(`[STITCH CLI] Memory Space Creation Failed`);
+  const res = (await fetched.json()) as string;
+
+  return res;
+}
+
+// 메모리 공간 정보 조회
+export async function getMemorySpace(args: {
+  repository: string;
+  userId: string;
+  apiKey: string;
+  ref?: string;
+  offset?: number;
+  limit?: number;
+}) {
+  const { repository, userId, apiKey, ref, offset, limit } = args;
+  const url =
+    `${BASE_URL}/memory-space/${repository}?userId=${userId}&apiKey=${apiKey}` +
+    (ref ? `&ref=${ref}` : '') +
+    (offset ? `&offset=${offset}` : '') +
+    (limit ? `&limit=${limit}` : '');
+  const fetched = await fetch(url);
+  if (!fetched.ok) throw new Error(`[STITCH CLI] Get Memory Space Failed`);
   const res = await fetched.json();
 
-  const id = res.id;
-  const name = res.name;
-
-  return formatResult({ id, name });
+  return res;
 }
 
-function formatResult(result: { id: string; name: string }): string {
-  return `
-===========================================
+// 메모리 공간 삭제
+export async function deleteMemorySpace(args: {
+  repository: string;
+  userId: string;
+  apiKey: string;
+}) {
+  const { repository, userId, apiKey } = args;
+  const fetched = await fetch(
+    `${BASE_URL}/memory-space/${repository}?userId=${userId}&apiKey=${apiKey}`,
+    {
+      method: 'DELETE',
+    }
+  );
+  if (!fetched.ok) throw new Error(`[STITCH CLI] Delete Memory Space Failed`);
+  const res = (await fetched.json()) as string;
 
-[STITCH AI] Memory Space Created
-- ID    : ${result.id}
-- Name  : ${result.name}
-
-===========================================
-`;
+  return res;
 }
 
-export async function listSpaces() {
-  const apiKey = process.env.STITCH_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('STITCH_API_KEY is not set');
-  }
-
-  const fetched = await fetch(`${BASE_URL}/memory/spaces`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      apiKey: apiKey,
-    },
-  });
-  if (!fetched.ok) {
-    return `[STITCH AI] Memory Space Listing Failed`;
-  }
+// 메모리 공간 히스토리 조회
+export async function getMemorySpaceHistory(args: {
+  repository: string;
+  userId: string;
+  apiKey: string;
+}) {
+  const { repository, userId, apiKey } = args;
+  const url = `${BASE_URL}/memory-space/${repository}/history?userId=${userId}&apiKey=${apiKey}`;
+  const fetched = await fetch(url);
+  if (!fetched.ok) throw new Error(`[STITCH CLI] Get Memory Space History Failed`);
   const res = await fetched.json();
 
-  return formatSpacesResult(res.data);
-}
-
-function formatSpacesResult(result: { id: string; name: string }[]): string {
-  return `
-===========================================
-
-[STITCH AI] Memory Spaces
-${result.map(space => `- ${space.id} : ${space.name}`).join('\n')}
-
-===========================================
-`;
+  return res;
 }

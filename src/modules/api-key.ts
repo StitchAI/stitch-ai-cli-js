@@ -1,31 +1,18 @@
-import { BASE_URL } from '../utils/api';
+import { BASE_URL } from '~/libs/api';
 
-type CreateApiKey = {
-  walletAddress: string;
-};
+export function getApiKey() {
+  const apiKey = process.env.STITCH_API_KEY;
+  if (!apiKey) throw new Error('[STITCH CLI] STITCH_API_KEY is not set in environment variables');
 
-export async function createApiKey(args: CreateApiKey) {
-  const fetched = await fetch(`${BASE_URL}/user?walletAddress=${args.walletAddress}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!fetched.ok) {
-    return `[STITCH AI] Api Key Creation Failed`;
-  }
-  const res = await fetched.json();
-
-  const apiKey = res.apiKey;
-
-  return formatResult({ apiKey });
+  return apiKey;
 }
 
-function formatResult(result: { apiKey: string }): string {
-  return `
-===========================================
+export async function getUserIdFromApiKey(args: { apiKey: string }) {
+  const apiKey = args.apiKey;
 
-[STITCH AI] Api Key Created
-- API Key  : ${result.apiKey}
+  const fetched = await fetch(`${BASE_URL}/user/api-key/user?apiKey=${apiKey}`);
+  if (!fetched.ok) throw new Error(`[STITCH CLI] Get UserId From Api Key Failed`);
 
-===========================================
-`;
+  const res = await fetched.json();
+  return res.userId;
 }
